@@ -1,6 +1,10 @@
 require "kelder/version"
 
 module Kelder
+  def self.signed_tenant_name
+    ActiveStorage.verifier.generate(Apartment::Tenant.current, purpose: :active_storage_controllers)
+  end
+
   module PrefixKeyWithToken
     # Prefix all generated blob keys with the tenant. Do not
     # use slash as a delimiter because it needs different escaping
