@@ -4,6 +4,7 @@ require 'apartment'
 require 'active_storage'
 require "kelder"
 require 'tmpdir'
+require 'support/kelder_app'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

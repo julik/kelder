@@ -1,11 +1,16 @@
 require 'spec_helper'
+# require 'active_storage'
 
 RSpec.describe Kelder do
+  let(:app) do
+    KelderApp.to_app
+  end
+
   before :all do
     Apartment.database_schema_file = File.expand_path(__dir__ + '/schema.rb')
 
-    db_filename = ('testdb_%s.sqlite3' % SecureRandom.hex(4))
-    ActiveRecord::Base.establish_connection(adapter: 'sqlite3', pool: 10, database: db_filename)
+    @db_filename = ('testdb_%s.sqlite3' % SecureRandom.hex(4))
+    ActiveRecord::Base.establish_connection(adapter: 'sqlite3', pool: 10, database: @db_filename)
 
     ActiveRecord::Migration.suppress_messages do
       ActiveRecord::Schema.define(:version => 1) do
@@ -21,10 +26,12 @@ RSpec.describe Kelder do
 
   after :all do
     Apartment::Tenant.drop("test_tenant_kelder_tenant123")
+    FileUtils.rm @db_filename
   end
 
   describe 'ActiveStorage::Blob overrides' do
     it 'prefixes the "key" attribute with the last component of the current tenant database name' do
+      require 'pry'; binding.pry
       Apartment::Tenant.switch("test_tenant_kelder_tenant123") do
         blob = ActiveStorage::Blob.new
         expect(blob.key).to start_with("tenant123")
