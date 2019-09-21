@@ -2,6 +2,7 @@ require 'spec_helper'
 # require 'active_storage'
 
 RSpec.describe Kelder do
+  include Rack::Test::Methods
   let(:app) do
     KelderApp.to_app
   end
@@ -30,8 +31,18 @@ RSpec.describe Kelder do
   end
 
   describe 'ActiveStorage::Blob overrides' do
+    it 'stay intact after app reload' do
+      if Rails.application.config.cache_classes
+        skip("Requires Rails.application.config.cache_classes to be false")
+      end
+
+      expect(ActiveStorage::Blob.ancestors).to include(Kelder::PrefixedSignedId)
+      Rails.application.reloader.reload!
+      expect(ActiveStorage::Blob.ancestors).to include(Kelder::PrefixedSignedId)
+    end
+
     it 'prefixes the "key" attribute with the last component of the current tenant database name' do
-      require 'pry'; binding.pry
+  #    require 'pry'; binding.pry
       Apartment::Tenant.switch("test_tenant_kelder_tenant123") do
         blob = ActiveStorage::Blob.new
         expect(blob.key).to start_with("tenant123")
@@ -58,10 +69,10 @@ RSpec.describe Kelder do
       blob_params = {blob: {filename: 'file.txt', byte_size: 123, checksum: "abefg"}}
 
       expect(Apartment::Tenant).not_to receive(:switch)
-      post "/rails/active_storage/direct_uploads", params: blob_params
+      post "/rails/active_storage/direct_uploads", JSON.dump(blob_params)
 
-      expect(response).to be_ok
-      parsed_response = JSON.load(response.body)
+      expect(last_response).to be_ok
+      parsed_response = JSON.load(last_response.body)
       expect(parsed_response["key"]).not_to start_with("tenant123")
     end
 
@@ -70,10 +81,10 @@ RSpec.describe Kelder do
       blob_params = {blob: {filename: 'file.txt', byte_size: 123, checksum: "abefg"}}
 
       expect(Apartment::Tenant).to receive(:switch).with("test_tenant_kelder_tenant123").and_call_original
-      post "/rails/active_storage/direct_uploads?signed_tenant_name=#{st}", params: blob_params
+      post "/rails/active_storage/direct_uploads?signed_tenant_name=#{st}", JSON.dump(blob_params)
 
-      expect(response).to be_ok
-      parsed_response = JSON.load(response.body)
+      expect(last_response).to be_ok
+      parsed_response = JSON.load(last_response.body)
       expect(parsed_response["key"]).to start_with("tenant123")
     end
   end

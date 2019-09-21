@@ -1,10 +1,7 @@
 require "bundler/setup"
-require 'rails'
-require 'apartment'
-require 'active_storage'
+require 'support/kelder_app'
 require "kelder"
 require 'tmpdir'
-require 'support/kelder_app'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
