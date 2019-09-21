@@ -10,22 +10,10 @@ ActiveRecord::Base.establish_connection(adapter: 'sqlite3', pool: 10, database: 
 class KelderApp < Rails::Application
   secrets.secret_token    = "secret_token"
   secrets.secret_key_base = "secret_key_base"
-
   config.eager_load = true
   config.cache_classes = false
-  # # Use cookie sessions - do not set expire_after: so that
-  # # the cookie is a "browser session cookie"
-  # config.session_store :cookie_store,
-  #   digest: "SHA512",
-  #   serializer: JSON
-
-  # config.logger = Logger.new($stderr)
-  # Rails.logger = config.logger
-
-  
-  routes.draw do
-    mount ActiveStorage::Engine => '/rails/activestorage'
-  end
+  config.logger = Logger.new($stderr)
+  Rails.logger = config.logger
 end
 
 ActiveStorage::Engine.configure do |engine|
