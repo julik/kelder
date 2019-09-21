@@ -1,3 +1,4 @@
+# File needed for Apartment
 ActiveRecord::Schema.define(:version => 1) do
   create_table :active_storage_blobs do |t|
     t.string   :key,        null: false

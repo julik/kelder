@@ -14,12 +14,7 @@ RSpec.describe Kelder do
     ActiveRecord::Base.establish_connection(adapter: 'sqlite3', pool: 10, database: @db_filename)
 
     ActiveRecord::Migration.suppress_messages do
-      ActiveRecord::Schema.define(:version => 1) do
-        create_table :things do |t|
-          t.string :description, :null => true
-          t.timestamps :null => false
-        end
-      end
+      require_relative 'schema'
     end
 
     Apartment::Tenant.create("test_tenant_kelder_tenant123")
